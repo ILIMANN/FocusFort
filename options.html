@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Porn Limiter Options</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        max-width: 400px;
+        margin: auto;
+        background: #f9f9f9;
+      }
+      h1 {
+        text-align: center;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+      button {
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      ul {
+        list-style: none;
+        padding-left: 0;
+      }
+      li {
+        background: white;
+        margin-bottom: 6px;
+        padding: 8px;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+      li button {
+        background: #f44336;
+        border: none;
+        color: white;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Porn Limiter Options</h1>
+
+    <input
+      type="text"
+      id="domainInput"
+      placeholder="Add domain to block (e.g. example.com)"
+    />
+    <button id="addBtn">Add</button>
+
+    <ul id="blockedList"></ul>
+
+    <script src="options.js"></script>
+  </body>
+</html>
