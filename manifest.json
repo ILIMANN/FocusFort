@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "Porn Limiter",
+  "name": "FocusFort",
   "version": "1.0",
-  "description": "Blocks adult sites and tracks visited domains.",
+  "description": "Lets you to block time consuming websites.",
   "permissions": [
     "webRequest",
     "webRequestBlocking",
@@ -24,7 +24,7 @@
       "64": "icons/icon64.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "Porn Limiter",
+    "default_title": "FocusFort",
     "default_popup": "popup.html"
   },
   "web_accessible_resources": [

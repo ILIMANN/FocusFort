@@ -74,6 +74,8 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(`${domain} is already blocked.`);
         showMessage(`${domain} is already blocked.`);
       }
+
+      browser.tabs.reload(tabs[0].id);
     } catch (e) {
       console.error("Error blocking current site:", e);
     }

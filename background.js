@@ -1,4 +1,4 @@
-console.log("Porn Limiter Extension started!");
+console.log("FocusFort started!");
 
 let blockedDomains = [];
 let blockingEnabled = true;
@@ -35,10 +35,7 @@ browser.storage.onChanged.addListener((changes, area) => {
 });
 
 browser.runtime.onMessage.addListener((message) => {
-  if (message.type === "updateBlockedDomains") {
-    blockedDomains = message.blockedDomains || [];
-    console.log("Blocked domains updated:", blockedDomains);
-  } else if (message.type === "toggleBlocking") {
+  if (message.type === "toggleBlocking") {
     blockingEnabled = message.enabled;
     console.log("Blocking enabled set to:", blockingEnabled);
   }
