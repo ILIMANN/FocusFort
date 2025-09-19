@@ -1,83 +1,107 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.getElementById("toggleBlocking");
-  const openBtn = document.getElementById("openOptions");
-  const blockBtn = document.getElementById("blockCurrentSite");
+/// <reference types="firefox-webext-browser" />
 
-  // Load blocking state
-  browser.storage.local
-    .get(["blockingEnabled", "blockedDomains"])
-    .then((result) => {
-      toggle.checked =
-        typeof result.blockingEnabled === "undefined"
-          ? true
-          : result.blockingEnabled;
-      // Initialize blockedDomains if not present
-      if (!Array.isArray(result.blockedDomains)) {
-        browser.storage.local.set({ blockedDomains: [] });
-      }
-    });
+const powerBtn = document.getElementById("powerBtn");
+const blockBtn = document.getElementById("blockBtn");
+const clearBtn = document.getElementById("clearBtn");
+const optionsBtn = document.getElementById("optionsBtn");
 
-  // Save toggle changes
-  toggle.addEventListener("change", () => {
-    browser.storage.local.set({ blockingEnabled: toggle.checked });
-    browser.runtime.sendMessage({
-      type: "toggleBlocking",
-      enabled: toggle.checked,
-    });
-  });
+const redirectUrl = browser.runtime.getURL("blocked.html");
+let isEnabledP;
 
-  // Open options page
-  openBtn.addEventListener("click", () => {
-    browser.runtime.openOptionsPage();
-  });
+function UpdatePowerButton() {
+	powerBtn.classList.toggle("on", isEnabledP);
+	powerBtn.classList.toggle("off", !isEnabledP);
+}
 
-  const messageDiv = document.getElementById("message");
+browser.storage.local.get("powerStatus").then((result) => {
+	if (result.powerStatus !== undefined) {
+		isEnabledP = result.powerStatus;
+	}
 
-  function showMessage(text) {
-    messageDiv.textContent = text;
-    setTimeout(() => {
-      messageDiv.textContent = "";
-    }, 3000);
-  }
-  // Block current site button handler
-  blockBtn.addEventListener("click", async () => {
-    try {
-      // Get current active tab
-      const tabs = await browser.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      if (tabs.length === 0) return;
-      const currentUrl = tabs[0].url;
-      const urlObj = new URL(currentUrl);
-      const domain = urlObj.hostname.toLowerCase();
+	UpdatePowerButton();
+});
 
-      // Get current blocked domains
-      const { blockedDomains = [] } = await browser.storage.local.get(
-        "blockedDomains"
-      );
+powerBtn.addEventListener("click", () => {
+	isEnabledP = !isEnabledP;
 
-      // If domain not already blocked, add it
-      if (!blockedDomains.includes(domain)) {
-        blockedDomains.push(domain);
-        await browser.storage.local.set({ blockedDomains });
-        // alert(`Blocked site: ${domain}`);
-        console.log(`Blocked site: ${domain}`);
-        showMessage(`Blocked site: ${domain}`);
-        // Optionally, notify background script to update list
-        browser.runtime.sendMessage({
-          type: "updateBlockedDomains",
-          blockedDomains,
-        });
-      } else {
-        //alert(`${domain} is already blocked.`);
-        console.log(`${domain} is already blocked.`);
-        showMessage(`${domain} is already blocked.`);
-      }
+	console.log("power button clicked");
 
-      browser.tabs.reload(tabs[0].id);
-    } catch (e) {
-      console.error("Error blocking current site:", e);
-    }
-  });
+	UpdatePowerButton();
+
+	browser.storage.local.set({ powerStatus: isEnabledP });
+});
+
+async function GetActiveTabUrl() {
+	let [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+	if (tab && tab.url && tab.url.startsWith("http")) {
+		let urlObj = new URL(tab.url);
+		return urlObj.hostname.toLowerCase();
+	}
+	console.error("There is no tab available!");
+	return null;
+}
+
+async function BlockThisPage(hostname) {
+	let result = await browser.storage.sync.get("blockedDomains");
+	let blockedList = result.blockedDomains || [];
+
+	if (!blockedList.includes(hostname)) {
+		blockedList.push(hostname);
+
+		await browser.storage.sync.set({ blockedDomains: blockedList });
+	} else {
+		console.error("Hostname already blocked:", hostname);
+	}
+}
+
+async function RedirectCurrentTab() {
+	const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+	if (!tab || !tab.id) return;
+
+	await browser.tabs.update(tab.id, { url: redirectUrl });
+}
+
+blockBtn.addEventListener("click", () => {
+	console.log("block button clicked");
+
+	if (isEnabledP) {
+		GetActiveTabUrl().then((hostname) => {
+			if (!hostname) return;
+
+			BlockThisPage(hostname);
+			RedirectCurrentTab();
+		});
+	}
+});
+
+browser.runtime.onMessage.addListener((data, sender) => {
+
+	
+	if (data.message === "block-current-site") {
+		if (isEnabledP) {
+			GetActiveTabUrl().then((hostname) => {
+				if (!hostname) return;
+
+				BlockThisPage(hostname);
+				RedirectCurrentTab();
+			});
+		}
+	}
+})
+
+async function ClearBlockedList() {
+	let emptyBlockedList = [];
+
+	await browser.storage.sync.set({ blockedDomains: emptyBlockedList });
+}
+
+clearBtn.addEventListener("click", () => {
+	console.log("clear button clicked");
+	ClearBlockedList();
+});
+
+optionsBtn.addEventListener("click", () => {
+	console.log("options button clicked");
+	browser.runtime.openOptionsPage();
+	window.close();
 });

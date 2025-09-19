@@ -1,67 +1,86 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>FocusFort</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        width: 250px;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        box-sizing: border-box;
-      }
-      label {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-      input[type="checkbox"] {
-        width: 40px;
-        height: 20px;
-        position: relative;
-        appearance: none;
-        background: #ccc;
-        outline: none;
-        border-radius: 20px;
-        transition: background 0.3s;
-        cursor: pointer;
-      }
-      input[type="checkbox"]:checked {
-        background: #4caf50;
-      }
-      input[type="checkbox"]::before {
-        content: "";
-        position: absolute;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        top: 1px;
-        left: 1px;
-        background: white;
-        transition: 0.3s;
-      }
-      input[type="checkbox"]:checked::before {
-        left: 21px;
-      }
-      button {
-        padding: 10px;
-        font-size: 16px;
-        cursor: pointer;
-      }
-    </style>
-  </head>
-  <body>
-    <label>
-      <input type="checkbox" id="toggleBlocking" />
-      Enable Blocking
-    </label>
-    <button id="blockCurrentSite">Block Current Site</button>
-    <button id="openOptions">Open Options</button>
-    <div id="message" style="color: red; margin-top: 10px"></div>
-    <script src="popup.js"></script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Focus Fort</title>
+		<style>
+			body {
+				font-family: sans-serif;
+				width: 160px;
+				height: 200px; /* increased for new button */
+				margin: 0;
+				padding: 8px;
+				background: #f9f9f9;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 8px;
+			}
+
+			#powerBtn {
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				border: none;
+				font-size: 18px;
+				font-weight: bold;
+				color: white;
+				cursor: default;
+			}
+
+			/* Red = Off */
+			#powerBtn.off {
+				background: #d9534f;
+			}
+
+			/* Green = On */
+			#powerBtn.on {
+				background: #5cb85c;
+			}
+
+			.blockWrapper {
+				width: 100%;
+				display: flex;
+				justify-content: center;
+				gap: 4px; /* space between buttons */
+			}
+
+			button {
+				height: 36px;
+				border: 1px solid #ccc;
+				border-radius: 6px;
+				background: white;
+				color: black;
+				font-size: 13px;
+				font-weight: 500;
+				cursor: pointer;
+				transition: background 0.2s ease, color 0.2s ease;
+			}
+
+			button:active {
+				background: #d9534f;
+				color: white;
+			}
+
+			#blockBtn,
+			#clearBtn,
+			#optionsBtn {
+				width: 120px;
+			}
+		</style>
+	</head>
+	<body>
+		<button id="powerBtn" class="off">⏻</button>
+		<div class="blockWrapper">
+			<button id="blockBtn">Block Current Site</button>
+		</div>
+		<div class="blockWrapper">
+			<button id="clearBtn">Clear All Blocks</button>
+		</div>
+		<div class="blockWrapper">
+			<button id="optionsBtn">Options</button>
+		</div>
+
+		<script src="popup.js"></script>
+	</body>
 </html>

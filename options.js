@@ -1,68 +1,49 @@
 const domainInput = document.getElementById("domainInput");
 const addBtn = document.getElementById("addBtn");
-const blockedList = document.getElementById("blockedList");
+const blockedListEl = document.getElementById("blockedList");
+let blockedDomainsO = [];
 
-function renderList(domains) {
-  blockedList.innerHTML = "";
-  domains.forEach((domain) => {
-    const li = document.createElement("li");
-    li.textContent = domain;
+async function LoadBlockedList() {
+	try {
+		const result = await browser.storage.sync.get("blockedDomains");
+		blockedDomainsO = result.blockedDomains || [];
 
-    const removeBtn = document.createElement("button");
-    removeBtn.textContent = "Remove";
-    removeBtn.addEventListener("click", () => {
-      removeDomain(domain);
-    });
+		console.log("(options page) loaded blockedList", blockedDomainsO);
 
-    li.appendChild(removeBtn);
-    blockedList.appendChild(li);
-  });
+		blockedListEl.innerHTML = "";
+
+		blockedDomainsO.forEach((domain) => {
+			const li = document.createElement("li");
+			li.textContent = domain;
+			blockedListEl.appendChild(li);
+		});
+	} catch (error) {
+		console.error("(options page) Error loading blocked domains:", error);
+	}
 }
 
-function saveDomains(domains) {
-  browser.storage.local.set({ blockedDomains: domains });
+async function SetBlockedList(typedDomain) {
+	try {
+		const result = await browser.storage.sync.get("blockedDomains");
+		blockedDomainsO = result.blockedDomains || [];
+
+		blockedDomainsO.push(typedDomain);
+		await browser.storage.sync.set({ blockedDomains: blockedDomainsO });
+	} catch (error) {
+		console.log("(options page) Error setting blocked domains: ", error);
+	}
 }
 
-function loadDomains() {
-  return browser.storage.local
-    .get("blockedDomains")
-    .then((result) => result.blockedDomains || []);
-}
+LoadBlockedList();
 
-function addDomain(domain) {
-  domain = domain.trim().toLowerCase();
-  if (!domain) return;
-
-  loadDomains().then((domains) => {
-    if (!domains.includes(domain)) {
-      domains.push(domain);
-      saveDomains(domains);
-      renderList(domains);
-      domainInput.value = "";
-    } else {
-      alert("Domain already in blocklist");
-    }
-  });
-}
-
-function removeDomain(domain) {
-  loadDomains().then((domains) => {
-    const filtered = domains.filter((d) => d !== domain);
-    saveDomains(filtered);
-    renderList(filtered);
-  });
-}
-
-// Initial load
-loadDomains().then(renderList);
-
-// Event listeners
-addBtn.addEventListener("click", () => {
-  addDomain(domainInput.value);
+browser.storage.onChanged.addListener((changes, area) => {
+	if (area === "sync" && changes.blockedDomains) {
+		LoadBlockedList();
+	}
 });
 
-domainInput.addEventListener("keyup", (e) => {
-  if (e.key === "Enter") {
-    addDomain(domainInput.value);
-  }
+addBtn.addEventListener("click", () => {
+	const typedDomain = domainInput.value.trim();
+	console.log("user typed: ", typedDomain);
+	SetBlockedList(typedDomain);
 });

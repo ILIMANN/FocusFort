@@ -1,33 +1,51 @@
 {
-  "manifest_version": 2,
-  "name": "FocusFort",
-  "version": "1.0",
-  "description": "Lets you to block time consuming websites.",
-  "permissions": [
-    "webRequest",
-    "webRequestBlocking",
-    "*://*/*",
-    "storage",
-    "tabs"
-  ],
-  "background": {
-    "scripts": ["background.js"]
-  },
-  "options_ui": {
-    "page": "options.html",
-    "open_in_tab": true
-  },
-  "browser_action": {
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "64": "icons/icon64.png",
-      "128": "icons/icon128.png"
-    },
-    "default_title": "FocusFort",
-    "default_popup": "popup.html"
-  },
-  "web_accessible_resources": [
-    "blocked.html"
-  ]
+	"manifest_version": 2,
+	"name": "Focus Fort",
+	"version": "1.0",
+	"description": "A simpe extension to improve your focus by blocking unwanted websites.",
+
+	"applications": {
+		"gecko": {
+			"id": "firefox-extension@focusfort.com"
+		}
+	},
+
+	"permissions": [
+		"webRequest",
+		"webRequestBlocking",
+		"<all_urls>",
+		"storage",
+		"tabs"
+	],
+
+	"commands": {
+		"block-current-site": {
+			"suggested_key": {
+				"default": "Alt+Shift+X",
+				"mac": "Command+Shift+X"
+			},
+			"description": "Block current website"
+		}
+	},
+
+	"icons": {
+		"64": "icons/icon64.png"
+	},
+
+	"browser_action": {
+		"default_icon": "icons/icon64.png",
+		"default_title": "Focus Fort",
+		"default_popup": "popup.html"
+	},
+
+	"options_ui": {
+		"page": "options.html",
+		"open_in_tab": true
+	},
+
+	"web_accessible_resources": ["blocked.html"],
+
+	"background": {
+		"scripts": ["background.js"]
+	}
 }

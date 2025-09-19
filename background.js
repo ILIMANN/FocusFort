@@ -1,70 +1,69 @@
-console.log("FocusFort started!");
+/// <reference types="firefox-webext-browser" />
 
-let blockedDomains = [];
-let blockingEnabled = true;
+console.log("Focus Fort has started!");
 
-// Load initial data
-function loadSettings() {
-  return browser.storage.local
-    .get(["blockedDomains", "blockingEnabled"])
-    .then((result) => {
-      blockedDomains = result.blockedDomains || [];
-      blockingEnabled =
-        typeof result.blockingEnabled === "undefined"
-          ? true
-          : result.blockingEnabled;
-      console.log("Loaded settings:", { blockedDomains, blockingEnabled });
-    });
-}
+const redirectUrl = browser.runtime.getURL("blocked.html");
 
-// Initial load
-loadSettings();
-
-// Listen for changes (e.g. from popup toggle or options)
-browser.storage.onChanged.addListener((changes, area) => {
-  if (area === "local") {
-    if (changes.blockedDomains) {
-      blockedDomains = changes.blockedDomains.newValue || [];
-      console.log("Updated blocked domains:", blockedDomains);
-    }
-    if (changes.blockingEnabled) {
-      blockingEnabled = changes.blockingEnabled.newValue;
-      console.log("Blocking enabled:", blockingEnabled);
-    }
-  }
+let isEnabledB = false;
+browser.storage.local.get("powerStatus").then((result) => {
+	if (result.powerStatus === undefined) {
+		browser.storage.local.set({ powerStatus: false });
+	}
+	isEnabledB = result.powerStatus;
+	console.log("(start point) isEnabled: ", isEnabledB);
 });
 
-browser.runtime.onMessage.addListener((message) => {
-  if (message.type === "toggleBlocking") {
-    blockingEnabled = message.enabled;
-    console.log("Blocking enabled set to:", blockingEnabled);
-  }
+let blockedDomainsB = [];
+browser.storage.sync.get("blockedDomains").then((result) => {
+	if (result.blockedDomains === undefined) {
+		browser.storage.sync.set({ blockedDomains: [] });
+	}
+	blockedDomainsB = result.blockedDomains || [];
+	console.log("(start point) blockedDomains: ", blockedDomainsB);
+});
+
+browser.storage.onChanged.addListener((changes, area) => {
+	if (area === "local" && changes.powerStatus) {
+		isEnabledB = changes.powerStatus.newValue;
+		console.log("(onChange) isEnabled: ", isEnabledB);
+	}
+
+	if (area === "sync" && changes.blockedDomains) {
+		blockedDomainsB = changes.blockedDomains.newValue || [];
+		console.log("(onChange) blockedDomains: ", blockedDomainsB);
+	}
 });
 
 browser.webRequest.onBeforeRequest.addListener(
-  (details) => {
-    if (!blockingEnabled) {
-      return; // Blocking is off, allow all requests
-    }
+	(details) => {
+		if (!isEnabledB || blockedDomainsB.length === 0) return;
 
-    try {
-      const urlObj = new URL(details.url);
-      const domain = urlObj.hostname.toLowerCase();
+		try {
+			const urlObj = new URL(details.url);
+			const domain = urlObj.hostname.toLowerCase();
 
-      const isBlocked = blockedDomains.some(
-        (blockedDomain) =>
-          domain === blockedDomain || domain.endsWith("." + blockedDomain)
-      );
+			console.log("Request: ", domain);
 
-      if (isBlocked) {
-        console.log("Redirecting blocked site:", details.url);
-        const redirectUrl = browser.runtime.getURL("blocked.html");
-        return { redirectUrl };
-      }
-    } catch (e) {
-      console.error("Invalid URL:", details.url);
-    }
-  },
-  { urls: ["<all_urls>"], types: ["main_frame"] },
-  ["blocking"]
+			const isBlocked = blockedDomainsB.some(
+				(blockedDomain) => domain === blockedDomain
+			);
+
+			console.log("isBlocked: ", isBlocked);
+
+			if (isBlocked) {
+				return { redirectUrl };
+			}
+		} catch (error) {
+			console.error("Invalid URL:", details.url);
+		}
+	},
+	{ urls: ["<all_urls>"], types: ["main_frame"] },
+	["blocking"]
 );
+
+browser.commands.onCommand.addListener((cmd) => {
+	if (cmd === "block-current-site") {
+		console.log("Blocked current site via shortcut!");
+		browser.runtime.sendMessage({ action: "block-current-site" });
+	}
+});
