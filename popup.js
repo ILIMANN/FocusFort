@@ -1,6 +1,6 @@
 /// <reference types="firefox-webext-browser" />
 
-const powerBtn = document.getElementById("powerBtn");
+const powerToggle = document.getElementById("powerToggle");
 const blockBtn = document.getElementById("blockBtn");
 const clearBtn = document.getElementById("clearBtn");
 const optionsBtn = document.getElementById("optionsBtn");
@@ -9,8 +9,8 @@ const redirectUrl = browser.runtime.getURL("blocked.html");
 let isEnabledP;
 
 function UpdatePowerButton() {
-	powerBtn.classList.toggle("on", isEnabledP);
-	powerBtn.classList.toggle("off", !isEnabledP);
+	powerToggle.checked = isEnabledP;
+	blockBtn.disabled = !isEnabledP;
 }
 
 browser.storage.local.get("powerStatus").then((result) => {
@@ -21,10 +21,10 @@ browser.storage.local.get("powerStatus").then((result) => {
 	UpdatePowerButton();
 });
 
-powerBtn.addEventListener("click", () => {
-	isEnabledP = !isEnabledP;
+powerToggle.addEventListener("change", () => {
+	isEnabledP = powerToggle.checked;
 
-	console.log("power button clicked");
+	console.log("power switch changed");
 
 	UpdatePowerButton();
 
@@ -75,9 +75,7 @@ blockBtn.addEventListener("click", () => {
 });
 
 browser.runtime.onMessage.addListener((data, sender) => {
-
-	
-	if (data.message === "block-current-site") {
+	if (data.action === "block-current-site") {
 		if (isEnabledP) {
 			GetActiveTabUrl().then((hostname) => {
 				if (!hostname) return;
@@ -87,7 +85,7 @@ browser.runtime.onMessage.addListener((data, sender) => {
 			});
 		}
 	}
-})
+});
 
 async function ClearBlockedList() {
 	let emptyBlockedList = [];

@@ -2,55 +2,162 @@
 <html>
 	<head>
 		<title>Focus Fort Options</title>
+		<meta charset="UTF-8" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"
+			rel="stylesheet"
+		/>
 		<style>
+			:root {
+				--bg-color: #f4f7f9;
+				--card-bg: #ffffff;
+				--primary-text: #2c3e50;
+				--secondary-text: #7f8c8d;
+				--accent-color: #3498db;
+				--accent-color-hover: #2980b9;
+				--danger-color: #e74c3c;
+				--border-color: #e0e6ed;
+				--box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+			}
 			body {
-				font-family: Arial, sans-serif;
+				font-family: "Poppins", sans-serif;
+				background-color: var(--bg-color);
+				color: var(--primary-text);
+				margin: 0;
 				padding: 20px;
-				max-width: 400px;
-				margin: auto;
-				background: #f9f9f9;
+				display: flex;
+				justify-content: center;
+			}
+			.container {
+				max-width: 500px;
+				width: 100%;
 			}
 			h1 {
 				text-align: center;
+				font-weight: 600;
+				margin-bottom: 24px;
 			}
-			input[type="text"] {
-				width: 100%;
-				padding: 8px;
-				margin-bottom: 10px;
-				box-sizing: border-box;
+			/* --- Cards --- */
+			.card {
+				background-color: var(--card-bg);
+				border-radius: 12px;
+				padding: 24px;
+				box-shadow: var(--box-shadow);
+				margin-bottom: 24px;
 			}
-			button {
-				padding: 8px 12px;
+			.add-form {
+				display: flex;
+				gap: 12px;
+			}
+			#domainInput {
+				flex-grow: 1;
+				padding: 10px 14px;
+				font-size: 14px;
+				border: 1px solid var(--border-color);
+				border-radius: 8px;
+				transition: border-color 0.2s ease, box-shadow 0.2s ease;
+			}
+			#domainInput:focus {
+				outline: none;
+				border-color: var(--accent-color);
+				box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+			}
+			#addBtn {
+				padding: 10px 20px;
+				font-size: 14px;
+				font-weight: 500;
+				color: white;
+				background-color: var(--accent-color);
+				border: none;
+				border-radius: 8px;
 				cursor: pointer;
+				transition: background-color 0.2s ease;
 			}
-			ul {
+			#addBtn:hover {
+				background-color: var(--accent-color-hover);
+			}
+			/* --- Blocked List --- */
+			h2 {
+				font-size: 18px;
+				font-weight: 500;
+				border-bottom: 1px solid var(--border-color);
+				padding-bottom: 8px;
+				margin-bottom: 16px;
+			}
+			#blockedList {
 				list-style: none;
-				padding-left: 0;
+				padding: 0;
+				margin: 0;
 			}
-			li {
-				background: white;
-				margin-bottom: 6px;
-				padding: 8px;
-				border-radius: 4px;
+			.blocked-item {
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+				padding: 12px 16px;
+				background-color: var(--card-bg);
+				border: 1px solid var(--border-color);
+				border-radius: 8px;
+				margin-bottom: 8px;
+				font-size: 15px;
+				transition: box-shadow 0.2s ease;
+			}
+			.blocked-item:hover {
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+			}
+			.remove-btn {
+				background: none;
+				border: none;
+				cursor: pointer;
+				padding: 4px;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				transition: background-color 0.2s ease;
+			}
+			.remove-btn svg {
+				width: 20px;
+				height: 20px;
+				color: var(--secondary-text);
+				transition: color 0.2s ease;
+			}
+			.remove-btn:hover svg {
+				color: var(--danger-color);
+			}
+			/* --- Empty State --- */
+			.empty-state {
+				text-align: center;
+				padding: 40px;
+				color: var(--secondary-text);
+				background-color: var(--card-bg);
+				border: 2px dashed var(--border-color);
+				border-radius: 12px;
 			}
 		</style>
 	</head>
 	<body>
-		<h1>Focus Fort Options</h1>
-
-		<input
-			type="text"
-			id="domainInput"
-			placeholder="Add domain to block (e.g. example.com)"
-		/>
-		<button id="addBtn">Add</button>
-
-		<ul id="blockedList"></ul>
-
+		<div class="container">
+			<h1>Focus Fort Options</h1>
+			<div class="card">
+				<div class="add-form">
+					<input
+						type="text"
+						id="domainInput"
+						placeholder="e.g., www.youtube.com"
+					/>
+					<button id="addBtn">Add</button>
+				</div>
+			</div>
+			<div class="card">
+				<h2>Blocked Domains</h2>
+				<ul id="blockedList"></ul>
+				<div id="emptyState" class="empty-state" style="display: none">
+					<p>Your block list is empty!</p>
+				</div>
+			</div>
+		</div>
 		<script src="options.js"></script>
 	</body>
 </html>
